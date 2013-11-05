@@ -76,12 +76,15 @@ public class SummauspalveluidenHallinta extends Thread {
 			while (true) {
 				int input = objectIn.readInt();
 				if (input == 1) {
+					annaSummauspalvelijoilleAikaa();
 					objectOut.writeInt(annaSumma());
 					System.out.println("Summaa pyydetty: " + annaSumma());
 				} else if (input == 2) {
+					annaSummauspalvelijoilleAikaa();
 					objectOut.writeInt(suurimmanSummanPalvelu());
 					System.out.println("Eniten summannutta kysytty: " + suurimmanSummanPalvelu());
 				} else if (input == 3) {
+					annaSummauspalvelijoilleAikaa();
 					System.out.println("Lukujen m‰‰r‰‰ pyydetty: " + lukujenMaara());
 					objectOut.writeInt(lukujenMaara());
 				} else {
@@ -107,13 +110,27 @@ public class SummauspalveluidenHallinta extends Thread {
 		System.exit(0);
 	}
 	
+	/**
+	 * Hallinta-s‰ie antaa jokaiselle summauspalvelus‰ikeelle yhden nanosekuntin suoritusaikaa
+	 */
+	private void annaSummauspalvelijoilleAikaa() {
+		for(int i = 0; i < palvelut.length; i++) {
+			try {
+				palvelut[i].join(0, 1);
+			} catch (InterruptedException e) {
+
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	private void suljeSummauspalvelut() {
 		for (int i = 0; i < palvelut.length; i++) {
 			palvelut[i].suljeYhteys();
 		}
 	}
 	
-	private int lukujenMaara() {
+	private int lukujenMaara() throws InterruptedException {
 		int lukumaara = 0;
 		for (int i = 0; i < annaSaadutLuvut().size(); i++) {
 			lukumaara = lukumaara + annaSaadutLuvut().get(i).size();
@@ -121,7 +138,7 @@ public class SummauspalveluidenHallinta extends Thread {
 		return lukumaara;
 	}
 	
-	private int suurimmanSummanPalvelu() {
+	private int suurimmanSummanPalvelu() throws InterruptedException {
 		int[] summat = new int[annaSaadutLuvut().size()];
 		for (int i = 0; i < annaSaadutLuvut().size(); i++) {
 			for (int j = 0; j < annaSaadutLuvut().get(i).size(); j++) {
@@ -136,7 +153,7 @@ public class SummauspalveluidenHallinta extends Thread {
 		return suurimmanIndeksi+1;
 	}
 	
-	private int annaSumma() {
+	private int annaSumma() throws InterruptedException {
 		int summa = 0;
 		for (int i = 0; i < annaSaadutLuvut().size(); i++) {
 			for (int j = 0; j < annaSaadutLuvut().get(i).size(); j++) {
@@ -154,7 +171,7 @@ public class SummauspalveluidenHallinta extends Thread {
 		return true;
 	}
 	
-	public synchronized ArrayList<ArrayList<Integer>> annaSaadutLuvut() {
+	public ArrayList<ArrayList<Integer>> annaSaadutLuvut() {
 		return saadutLuvut;
 	}
 }
