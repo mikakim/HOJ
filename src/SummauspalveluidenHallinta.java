@@ -26,7 +26,7 @@ public class SummauspalveluidenHallinta extends Thread {
 				break;
 			} catch (SocketTimeoutException ste) {
 				if (i == 4) {
-					System.out.println("Yhteyttä ei muodostunut. Suljetaan sovellusta.");
+					System.out.println("Yhteyttï¿½ ei muodostunut. Suljetaan sovellusta.");
 					System.exit(0);
 				}
 			}
@@ -92,7 +92,7 @@ public class SummauspalveluidenHallinta extends Thread {
 					System.out.println("Eniten summannutta kysytty: " + suurimmanSummanPalvelu());
 				} else if (input == 3) {
 					annaSummauspalvelijoilleAikaa();
-					System.out.println("Lukujen määrää pyydetty: " + lukujenMaara());
+					System.out.println("Lukujen mï¿½ï¿½rï¿½ï¿½ pyydetty: " + lukujenMaara());
 					objectOut.writeInt(lukujenMaara());
 				} else {
 					objectOut.writeInt(-1);
@@ -118,7 +118,7 @@ public class SummauspalveluidenHallinta extends Thread {
 	}
 	
 	/**
-	 * Hallinta-säie antaa jokaiselle summauspalvelusäikeelle yhden nanosekuntin suoritusaikaa
+	 * Hallinta-sï¿½ie antaa jokaiselle summauspalvelusï¿½ikeelle yhden nanosekuntin suoritusaikaa
 	 */
 	private void annaSummauspalvelijoilleAikaa() {
 		for(int i = 0; i < palvelut.length; i++) {
@@ -157,7 +157,7 @@ public class SummauspalveluidenHallinta extends Thread {
 			if (summat[suurimmanIndeksi] < summat[i])
 				suurimmanIndeksi = i;
 		}
-		return suurimmanIndeksi+1;
+		return suurimmanIndeksi;
 	}
 	
 	private int annaSumma() {
@@ -174,7 +174,7 @@ public class SummauspalveluidenHallinta extends Thread {
 		if (luku == 0)
 			return false;
 		annaSaadutLuvut().get(indeksi).add(luku);
-		System.out.println(indeksi + ". summauspalvelu lisäsi luvun " + luku);
+		System.out.println(indeksi + ". summauspalvelu lisï¿½si luvun " + luku);
 		return true;
 	}
 	
