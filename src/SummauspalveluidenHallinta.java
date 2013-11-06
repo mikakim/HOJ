@@ -13,21 +13,23 @@ public class SummauspalveluidenHallinta extends Thread {
 		hallinta.start();
 	}
 		
-	private Socket luoYhteys(int omaPortti, String osoite, int portti) throws Exception {
+	private Socket luoYhteys(int omaPortti, String osoite, int portti) throws IOException {
 		Socket soketti = null;
 		ss = new ServerSocket(omaPortti);
-		for (int i = 0; i < 5; i++) {
-			ss.setSoTimeout(50000);
-			sendUDP(osoite, portti, Integer.toString(omaPortti));
-			soketti = ss.accept();
-			if (ss.isClosed()) {
+		int i = 0;
+		for (; i < 5; i++) {
+			try {
+				ss.setSoTimeout(5000);
 				sendUDP(osoite, portti, Integer.toString(omaPortti));
-			} else {
+				System.out.println(i+1 + ". yhteysyritys...");
+				soketti = ss.accept();
 				break;
+			} catch (SocketTimeoutException ste) {
+				if (i == 4) {
+					System.out.println("Yhteyttä ei muodostunut. Suljetaan sovellusta.");
+					System.exit(0);
+				}
 			}
-		}
-		if (ss.isClosed()) {
-			// TODO: Nostaa poikkeuksen, yhteyttä ei muodostettu.
 		}
 		return soketti;
 	}
@@ -52,13 +54,18 @@ public class SummauspalveluidenHallinta extends Thread {
 	public void run() {
 		try {
 			Socket cs = luoYhteys(2000, "localhost", 3126);
-			
-			// Tiedostovirran luominen
 			InputStream inputS = cs.getInputStream();
 			OutputStream outputS = cs.getOutputStream();
 			ObjectInputStream objectIn = new ObjectInputStream(inputS);
 			ObjectOutputStream objectOut = new ObjectOutputStream(outputS);
-			int lukumaara = objectIn.readInt();
+			int lukumaara = 0;
+			try {
+				cs.setSoTimeout(5000);
+				lukumaara = objectIn.readInt();
+			} catch (SocketTimeoutException e1) {
+				objectOut.writeInt(-1);
+				System.exit(0);
+			}
 			palvelut = new Summauspalvelu[lukumaara];
 			saadutLuvut = new ArrayList<ArrayList<Integer>>(lukumaara);
 			
@@ -96,18 +103,18 @@ public class SummauspalveluidenHallinta extends Thread {
 				}
 				objectOut.flush();
 			}
-		} catch (Exception e1) {
-			
-		}
-		for(int i = 0; i < palvelut.length; i++) {
-			try {
-				palvelut[i].join();
-			} catch (InterruptedException e) {
-
-				e.printStackTrace();
+			for(int i = 0; i < palvelut.length; i++) {
+				try {
+					palvelut[i].join();
+				} catch (InterruptedException e) {
+	
+					e.printStackTrace();
+				}
 			}
+			System.exit(0);
+		} catch (IOException ioe) {
+			System.err.print(ioe.toString());
 		}
-		System.exit(0);
 	}
 	
 	/**
@@ -130,7 +137,7 @@ public class SummauspalveluidenHallinta extends Thread {
 		}
 	}
 	
-	private int lukujenMaara() throws InterruptedException {
+	private int lukujenMaara() {
 		int lukumaara = 0;
 		for (int i = 0; i < annaSaadutLuvut().size(); i++) {
 			lukumaara = lukumaara + annaSaadutLuvut().get(i).size();
@@ -138,7 +145,7 @@ public class SummauspalveluidenHallinta extends Thread {
 		return lukumaara;
 	}
 	
-	private int suurimmanSummanPalvelu() throws InterruptedException {
+	private int suurimmanSummanPalvelu() {
 		int[] summat = new int[annaSaadutLuvut().size()];
 		for (int i = 0; i < annaSaadutLuvut().size(); i++) {
 			for (int j = 0; j < annaSaadutLuvut().get(i).size(); j++) {
@@ -153,7 +160,7 @@ public class SummauspalveluidenHallinta extends Thread {
 		return suurimmanIndeksi+1;
 	}
 	
-	private int annaSumma() throws InterruptedException {
+	private int annaSumma() {
 		int summa = 0;
 		for (int i = 0; i < annaSaadutLuvut().size(); i++) {
 			for (int j = 0; j < annaSaadutLuvut().get(i).size(); j++) {

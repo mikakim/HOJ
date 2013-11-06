@@ -27,7 +27,7 @@ public class Summauspalvelu extends Thread {
 			ObjectInputStream objectIn = new ObjectInputStream((inputS));
 			while (onYhteys) {
 				if (!hallinta.lisaaLuku(index, objectIn.readInt())) {				
-					soketti.close();
+					suljeYhteys();
 					break;
 				} else {
 									
@@ -39,6 +39,12 @@ public class Summauspalvelu extends Thread {
 		System.out.println(index + ". summauspalvelu suljettu!");
 	}
 	public void suljeYhteys() {
+		try {
+			soketti.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		onYhteys = false;
 	}
 }
